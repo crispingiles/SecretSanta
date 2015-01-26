@@ -9,5 +9,10 @@
         /// The key by which we identify the item
         /// </summary>
         public int Id { get; set; }
+
+        /// <summary>
+        /// The email address of the user
+        /// </summary>
+        public string EmailAddress { get; set; }
     }
 }
