@@ -60,6 +60,37 @@ WHERE lp.ListId = @listId", SelectPersonsFragment);
             }
         }
 
+        public async Task<Person> SavePerson(Person person)
+        {
+            const string cmdText = @"MERGE dbo.Person AS TARGET
+USING (SELECT @emailAddress) AS SOURCE (EmailAddress)
+ON TARGET.EmailAddress = SOURCE.EmailAddress
+WHEN MATCHED THEN
+	UPDATE Set EmailAddress = @emailAddress
+WHEN NOT MATCHED THEN
+	INSERT (EmailAddress)
+	VALUES (@emailAddress)
+	OUTPUT inserted.PersonId INTO @insertedPersonIds;
+
+SELECT PersonId FROM @insertedPersonIds";
+
+            using (var connection = await sqlProvider.GetConnection())
+            {
+                var cmd = new SqlCommand {CommandText = cmdText, Connection = connection};
+                cmd.Parameters.Add(new SqlParameter
+                {
+                    ParameterName = "@emailAddress",
+                    SqlDbType = SqlDbType.VarChar,
+                    Value = person.EmailAddress
+                });
+
+                var personId = (int) await cmd.ExecuteScalarAsync();
+                person.Id = personId;
+            }
+
+            return person;
+        }
+
         private async Task<IReadOnlyList<Person>> ReadRowsAsync(SqlCommand cmd)
         {
             using (var reader = await cmd.ExecuteReaderAsync())

@@ -18,5 +18,9 @@ namespace CWB.SecretSanta.Core.DAL
         /// </summary>
         Task<IReadOnlyList<Person>> GetPersons(int listId);
 
+        /// <summary>
+        /// Save the person to the database
+        /// </summary>
+        Task<Person> SavePerson(Person person);
     }
 }
